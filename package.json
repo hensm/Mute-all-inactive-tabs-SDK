@@ -1,0 +1,25 @@
+{
+  "title": "Mute all inactive tabs (SDK)",
+  "name": "muteinactivesdk",
+  "id": "muteinactivesdk@cssu.in",
+  "version": "0.0.1",
+  "description": "Automatically mutes all inactive tabs.",
+  "main": "index.js",
+  "author": "Marcii <marcii@cssu.in>",
+  "engines": {
+    "firefox": ">=38.0a1"
+  },
+  "license": "MIT",
+  "keywords": [
+    "jetpack"
+  ],
+  "preferences": [
+    {
+      "name": "affectAllWindows",
+      "title": "Affect All Windows",
+      "description": "Mutes all tabs except the active tab in the active window",
+      "type": "bool",
+      "value": false
+    }
+  ]
+}
