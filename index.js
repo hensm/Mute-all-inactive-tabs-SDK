@@ -4,14 +4,19 @@ const tabs = require("sdk/tabs");
 const tabs_utils = require("sdk/tabs/utils");
 const simple_prefs = require("sdk/simple-prefs");
 
-let tab_blacklist = [];
+const tab_blacklist = [];
 
 function isBlacklisted(tab) {
 	return tab_blacklist.includes(tabs_utils.getTabId(tab));
 }
 
 function setMuted(tab, muted) {
-	let browser = tabs_utils.getBrowserForTab(tab);
+	const browser = tabs_utils.getBrowserForTab(tab);
+
+	if (isBlacklisted(tab)) {
+		return;
+	}
+
 	if (muted) {
 		browser.mute();
 		tab.setAttribute("muted", "true");
@@ -22,42 +27,40 @@ function setMuted(tab, muted) {
 }
 
 function updateInactive() {
-	let tabs_arr = tabs_utils.getTabs();
+	const tabs_arr = tabs_utils.getTabs();
 	tabs_arr.filter(tab => {
-		let selected = tab.getAttribute("selected");
-		let audible = tab.getAttribute("soundplaying") === "true";
+		const selected = tab.getAttribute("selected");
+		const audible = tab.getAttribute("soundplaying") === "true";
 
-		if (simple_prefs.prefs["affectAllWindows"]) {
-			return (tab !== viewFor(tabs.activeTab)) && audible;
-		} else {
-			return !selected && audible;
-		}
-	}).forEach(tab => {
-		if (!isBlacklisted(tab)) {
-			setMuted(tab, true)
-		}
-	});
+		return simple_prefs.prefs["affectAllWindows"]
+			? (tab !== viewFor(tabs.activeTab)) && audible
+			: !selected && audible;
+
+	}).forEach(tab => setMuted(tab, true));
 }
 
+
 tabs.on("activate", tab => {
-	let xul_tab = viewFor(tab);
-	if (!isBlacklisted(xul_tab)) {
-		setMuted(xul_tab, false);
-	}
+	setMuted(viewFor(tab), false);
 	updateInactive();
 });
+
 tabs.on("pageshow", tab => updateInactive());
 simple_prefs.on("affectAllWindows", updateInactive);
+
 
 if (simple_prefs.prefs["ignoreUserModifiedTabs"]) {
 	function setListener(tab) {
 		tab.addEventListener("click", e => {
-			let tab = e.target;
-			if (tab._overPlayingIcon) {
-				let tab_id = tabs_utils.getTabId(tab);
-				if (!tab_blacklist.includes(tab_id)) {
-					tab_blacklist.push(tab_id);
-				}
+			const tab = e.target;
+
+			if (!tab._overPlayingIcon) {
+				return;
+			}
+
+			const tab_id = tabs_utils.getTabId(tab);
+			if (!tab_blacklist.includes(tab_id)) {
+				tab_blacklist.push(tab_id);
 			}
 		});
 	}
