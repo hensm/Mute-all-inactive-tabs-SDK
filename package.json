@@ -20,6 +20,13 @@
       "description": "Mutes all tabs except the active tab in the active window",
       "type": "bool",
       "value": false
+    },
+    {
+      "name": "ignoreUserModifiedTabs",
+      "title": "Ignore User-Modified Tabs",
+      "description": "Don't mute any tabs whose state has been manually set",
+      "type": "bool",
+      "value": true
     }
   ],
   "permissions": {
